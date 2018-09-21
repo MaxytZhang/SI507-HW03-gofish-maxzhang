@@ -165,7 +165,7 @@ def player_turn(player1, player2, deck):
     print("Player1 please choose a random rank in your hand")
     num1 = random.randint(0, len(player1.cards)-1)
     card1 = player1.cards[num1]
-    print("Player1 chooses: " + card1.rank)
+    print("Player1 chooses: " + str(card1.rank))
     if player2.check(card1):
         print("Player2 have the card(s) with the same rank")
         for c in player2.transfer_card(card1):
@@ -208,7 +208,7 @@ def play_fish_game():
     deal = deck.deal(2, 7)
     player1 = Hand(deal[0], "player1")
     player2 = Hand(deal[1], "player2")
-
+    player_turn(player1, player2, deck)
     i = 0
     '''while deck:
         if i % 2 == 0:
@@ -219,10 +219,6 @@ def play_fish_game():
     '''
 
     # one question: how to deal "book"? I will remain that for you. better to have sth to store the score(number of book and pop the book in the hand)
-    pass
-
-
-def player_turn(controler, guest, deck):
     pass
 
 
