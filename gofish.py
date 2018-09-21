@@ -172,7 +172,7 @@ def player_turn(player1, player2, deck):
             player1.add_card(c)
         player1.book()
     else:
-        print("Player2 doesn't have the card(s) with the same rank \n Player2 go fish")
+        print("Player2 doesn't have the card(s) with the same rank \nPlayer2 go fish")
         new_card2 = deck.pop_card()
         while new_card2.rank == card1.rank:
             print("The new card has the same rank, Player could get a new turn")
@@ -184,7 +184,7 @@ def player_turn(player1, player2, deck):
     print("Player2 please choose a random rank in your hand")
     num2 = random.randint(0, len(player2.cards)-1)
     card2 = player2.cards[num2]
-    print("Player2 chooses: " + card2.rank)
+    print("Player2 chooses: " + str(card2.rank))
     if player2.check(card2):
         print("Player1 have the card(s) with the same rank")
         for c in player1.transfer_card(card2):
