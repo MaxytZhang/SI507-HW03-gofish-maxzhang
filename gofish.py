@@ -89,7 +89,8 @@ class Hand(object):
             card_strs.append(c.__str__())
         if card.__str__() not in card_strs:
             self.cards.append(card)
-    
+
+
     def remove_card(self, card):
         card_strs = []
         for c in self.cards:
@@ -126,78 +127,68 @@ class Hand(object):
         self.cards = tmp
 
     def book(self):
-        cards_copy = []
+        cards_copy = self.cards[:]
         card_number = len(self.cards)
-        for card in self.cards:
-            cards_copy.append(card)
         for i in range(card_number):
             count = 1
             count_list = [i]
-            for j in range(i+1,card_number):
+            for j in range(i + 1, card_number):
                 if cards_copy[i].rank == cards_copy[j].rank:
-                    count = count+1
+                    count = count + 1
                     count_list.append(j)
             if count == 4:
                 for c in count_list:
-                    self.face.append(self.remove_card(self.cards[c]))
-                print(i + "is in the book")
-                self.face_number = self.face_number+1
+                    self.face.append(self.remove_card(cards_copy[c]))
+                print("%s is in the book"%(cards_copy[i].rank))
+                self.face_number = self.face_number + 1
 
     def check(self, card):
         card_ranks = []
         for c in self.cards:
-            card_ranks.append(c.rank)
+            if c.rank not in card_ranks:
+                card_ranks.append(c.rank)
         if card.rank in card_ranks:
             return True
 
     def transfer_card(self, card):
         card_list = []
-        for c in self.cards:
-            if c.rank == card.rank:
-                card_list.append(c)
-                self.remove_card(c)
+        for i in range(len(self.cards)-1, -1, -1):
+            if self.cards[i].rank == card.rank:
+                card_list.append(self.cards[i])
+                self.remove_card(self.cards[i])
         return card_list
 
 
 
-def player_turn(player1, player2, deck):
-    print("This is player1's turn")
-    print("Player1 please choose a random rank in your hand")
-    num1 = random.randint(0, len(player1.cards)-1)
-    card1 = player1.cards[num1]
-    print("Player1 chooses: " + str(card1.rank))
-    if player2.check(card1):
-        print("Player2 have the card(s) with the same rank")
-        for c in player2.transfer_card(card1):
-            player1.add_card(c)
-        player1.book()
+def player_turn(A, B, deck):
+    print ("%s's number: %d"%(A.name, len(A.cards)))
+    print("This is %s's turn"%(A.name))
+    print("%s please choose a random rank in your hand"%(A.name))
+    num1 = random.randint(0, len(A.cards)-1)
+    card1 = A.cards[num1]
+    print("%s chooses: %s"%(A.name,str(card1.rank)))
+    if B.check(card1):
+        print("%s have the card(s) with the same rank"%(B.name))
+        list_card = B.transfer_card(card1)
+        for c in list_card:
+            A.add_card(c)
+        print("%s add %d card(s) from %s"%(A.name, len(list_card), B.name))
+        A.book()
+        if len(A.cards) or len(B.cards)== 0:
+            return
     else:
-        print("Player2 doesn't have the card(s) with the same rank \nPlayer2 go fish")
-        new_card2 = deck.pop_card()
-        while new_card2.rank == card1.rank:
+        print("%s doesn't have the card(s) with the same rank \n%s go fish"%(B.name, B.name))
+        new_card = deck.pop_card()
+        A.add_card(new_card)
+        print("%s add %s in hand"%(A.name, new_card.rank))
+        A.book()
+        if len(A.cards) == 0:
+            return
+        if new_card.rank == card1.rank:
             print("The new card has the same rank, Player could get a new turn")
-            new_card2 = deck.pop_card
-        player2.add_card(new_card2)
-    print("Player1' turn ends")
-
-    print("This is player2's turn")
-    print("Player2 please choose a random rank in your hand")
-    num2 = random.randint(0, len(player2.cards)-1)
-    card2 = player2.cards[num2]
-    print("Player2 chooses: " + str(card2.rank))
-    if player2.check(card2):
-        print("Player1 have the card(s) with the same rank")
-        for c in player1.transfer_card(card2):
-            player2.add_card(c)
-        player2.book()
-    else:
-        print("Player1 doesn't have the card(s) with the same rank \n Player1 go fish")
-        new_card1 = deck.pop_card()
-        while new_card1.rank == card1.rank:
-            print("The new card has the same rank, Player could get a new turn")
-            new_card1 = deck.pop_card
-        player2.add_card(new_card1)
-    print("Player2's turn ends")
+            player_turn(A, B, deck)
+        else:
+            print("%s's turn ends"%(A.name))
 
 
 
@@ -208,18 +199,24 @@ def play_fish_game():
     deal = deck.deal(2, 7)
     player1 = Hand(deal[0], "player1")
     player2 = Hand(deal[1], "player2")
-    player_turn(player1, player2, deck)
-    i = 0
-    '''while deck:
+    i = 0    
+    while len(player1.cards)!=0 and len(player2.cards)!=0:
         if i % 2 == 0:
             player_turn(player1, player2, deck)
+            i = i + 1
+            continue
         else:
-            player_turn(player2, player2, deck)
-        i = i + 1
-    '''
-
-    # one question: how to deal "book"? I will remain that for you. better to have sth to store the score(number of book and pop the book in the hand)
-    pass
+            player_turn(player2, player1, deck)
+            i = i + 1
+            continue
+    
+    print ("player1: %d, player2: %d" %(player1.face_number, player2.face_number))
+    if player1.face_number > player2.face_number:
+        print ("player1 wins")
+    elif player1.face_number == player2.face_number:
+        print ("Tie")
+    else:
+        print ("player2 wins")
 
 
     
