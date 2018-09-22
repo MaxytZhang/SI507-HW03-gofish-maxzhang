@@ -127,8 +127,11 @@ class Hand(object):
         self.cards = tmp
 
     def book(self):
+        card_status = []
         cards_copy = self.cards[:]
         card_number = len(self.cards)
+        for i in range(card_number):
+            card_status.append(True)
         for i in range(card_number):
             count = 1
             count_list = [i]
@@ -138,9 +141,12 @@ class Hand(object):
                     count_list.append(j)
             if count == 4:
                 for c in count_list:
-                    self.face.append(self.remove_card(cards_copy[c]))
-                print("%s is in the book"%(cards_copy[i].rank))
+                    card_status[c] = False
+                print("%s is in the book" % cards_copy[i].rank)
                 self.face_number = self.face_number + 1
+        for i in range(card_number):
+            if not card_status[i]:
+                self.face.append(self.remove_card(cards_copy[i]))
 
     def check(self, card):
         card_ranks = []
@@ -149,6 +155,8 @@ class Hand(object):
                 card_ranks.append(c.rank)
         if card.rank in card_ranks:
             return True
+        else:
+            return False
 
     def transfer_card(self, card):
         card_list = []
@@ -159,36 +167,40 @@ class Hand(object):
         return card_list
 
 
-
-def player_turn(A, B, deck):
-    print ("%s's number: %d"%(A.name, len(A.cards)))
-    print("This is %s's turn"%(A.name))
-    print("%s please choose a random rank in your hand"%(A.name))
-    num1 = random.randint(0, len(A.cards)-1)
-    card1 = A.cards[num1]
-    print("%s chooses: %s"%(A.name,str(card1.rank)))
-    if B.check(card1):
-        print("%s have the card(s) with the same rank"%(B.name))
-        list_card = B.transfer_card(card1)
+def player_turn(a, b, deck):
+    if len(a.cards) == 0:
+        return
+    print("%s's number: %d" % (a.name, len(a.cards)))
+    print("This is %s's turn" % a.name)
+    print("%s please choose a random rank in your hand" % a.name)
+    if len(a.cards) > 1:
+        num1 = random.randint(0, len(a.cards)-1)
+    else:
+        num1 = 0
+    card1 = a.cards[num1]
+    print("%s chooses: %s" % (a.name, str(card1.rank)))
+    if b.check(card1):
+        print("%s have the card(s) with the same rank" % b.name)
+        list_card = b.transfer_card(card1)
         for c in list_card:
-            A.add_card(c)
-        print("%s add %d card(s) from %s"%(A.name, len(list_card), B.name))
-        A.book()
-        if len(A.cards) or len(B.cards)== 0:
+            a.add_card(c)
+        print("%s add %d card(s) from %s" % (a.name, len(list_card), b.name))
+        a.book()
+        if len(a.cards) or len(b.cards) == 0:
             return
     else:
-        print("%s doesn't have the card(s) with the same rank \n%s go fish"%(B.name, B.name))
+        print("%s doesn't have the card(s) with the same rank \n%s go fish" % (b.name, a.name))
         new_card = deck.pop_card()
-        A.add_card(new_card)
-        print("%s add %s in hand"%(A.name, new_card.rank))
-        A.book()
-        if len(A.cards) == 0:
+        a.add_card(new_card)
+        print("%s add %s in hand" % (a.name, new_card.rank))
+        a.book()
+        if len(a.cards) == 0:
             return
         if new_card.rank == card1.rank:
             print("The new card has the same rank, Player could get a new turn")
-            player_turn(A, B, deck)
+            player_turn(a, b, deck)
         else:
-            print("%s's turn ends"%(A.name))
+            print("%s's turn ends" % a.name)
 
 
 
@@ -200,7 +212,7 @@ def play_fish_game():
     player1 = Hand(deal[0], "player1")
     player2 = Hand(deal[1], "player2")
     i = 0    
-    while len(player1.cards)!=0 and len(player2.cards)!=0:
+    while len(player1.cards) != 0 or len(player2.cards) != 0:
         if i % 2 == 0:
             player_turn(player1, player2, deck)
             i = i + 1
@@ -210,55 +222,13 @@ def play_fish_game():
             i = i + 1
             continue
     
-    print ("player1: %d, player2: %d" %(player1.face_number, player2.face_number))
+    print("player1: %d, player2: %d" % (player1.face_number, player2.face_number))
     if player1.face_number > player2.face_number:
-        print ("player1 wins")
+        print("player1 wins")
     elif player1.face_number == player2.face_number:
-        print ("Tie")
+        print("Tie")
     else:
-        print ("player2 wins")
-
-
-    
-
-def play_war_game(testing=False):
-    # Call this with testing = True and it won't print out all the game stuff -- makes it hard to see test results
-    player1 = Deck()
-    player2 = Deck()
-
-    p1_score = 0
-    p2_score = 0
-
-    player1.shuffle()
-    player2.shuffle()
-    if not testing:
-        print("\n*** BEGIN THE GAME ***\n")
-    for i in range(52):
-        p1_card = player1.pop_card()
-        p2_card = player2.pop_card()
-        print('p1 rank_num=', p1_card.rank_num, 'p1 rank_num=', p2_card.rank_num)
-        if not testing:
-            print("Player 1 plays", p1_card,"& Player 2 plays", p2_card)
-
-        if p1_card.rank_num > p2_card.rank_num:
-
-            if not testing:
-                print("Player 1 wins a point!")
-            p1_score += 1
-        elif p1_card.rank_num < p2_card.rank_num:
-            if not testing:
-                print("Player 2 wins a point!")
-            p2_score += 1
-        else:
-            if not testing:
-                print("Tie. Next turn.")
-
-    if p1_score > p2_score:
-        return "Player1", p1_score, p2_score
-    elif p2_score > p1_score:
-        return "Player2", p1_score, p2_score
-    else:
-        return "Tie", p1_score, p2_score
+        print("player2 wins")
 
 if __name__ == "__main__":
     play_fish_game()
